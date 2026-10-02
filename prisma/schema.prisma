@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RideStatus {
+  DRAFT
+  PLANNED
+  COMPLETED
+}
+
+enum StopType {
+  START
+  DESTINATION
+  GAS
+  FOOD
+  SCENIC
+  REST
+  CUSTOM
+}
+
+model User {
+  id          String       @id @default(cuid())
+  email       String       @unique
+  name        String?
+  motorcycles Motorcycle[]
+  rides       Ride[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Motorcycle {
+  id                 String   @id @default(cuid())
+  ownerId            String?
+  owner              User?    @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  nickname           String?
+  year               Int?
+  make               String
+  model              String
+  tankCapacityGallons Decimal? @db.Decimal(6, 2)
+  averageMpg         Decimal? @db.Decimal(6, 2)
+  rides              Ride[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model Ride {
+  id                    String       @id @default(cuid())
+  ownerId               String?
+  owner                 User?        @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  motorcycleId          String?
+  motorcycle            Motorcycle?  @relation(fields: [motorcycleId], references: [id], onDelete: SetNull)
+  name                  String
+  rideDate              DateTime?
+  status                RideStatus   @default(DRAFT)
+  plannedDistanceMiles  Decimal?     @db.Decimal(9, 2)
+  plannedDurationMinutes Int?
+  actualDistanceMiles   Decimal?     @db.Decimal(9, 2)
+  completedAt           DateTime?
+  notes                 String?
+  stops                 RideStop[]
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  @@index([ownerId])
+  @@index([motorcycleId])
+  @@index([status])
+}
+
+model RideStop {
+  id              String   @id @default(cuid())
+  rideId          String
+  ride            Ride     @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  sortOrder       Int
+  type            StopType
+  name            String
+  address         String?
+  latitude        Decimal? @db.Decimal(9, 6)
+  longitude       Decimal? @db.Decimal(9, 6)
+  durationMinutes Int      @default(0)
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([rideId, sortOrder])
+  @@index([rideId])
+}
