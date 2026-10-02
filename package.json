@@ -7,11 +7,13 @@
     "dev": "next dev --turbopack",
     "prebuild": "prisma generate",
     "build": "next build",
+    "prestart": "prisma migrate deploy",
     "start": "next start",
     "lint": "eslint .",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
     "db:studio": "prisma studio",
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down"
@@ -22,6 +24,7 @@
     "dotenv": "^17.0.0",
     "next": "16.3.8",
     "pg": "^8.16.0",
+    "prisma": "^7.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -33,7 +36,6 @@
     "@types/react-dom": "^19.2.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "16.3.8",
-    "prisma": "^7.0.0",
     "tailwindcss": "^4.1.0",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0"

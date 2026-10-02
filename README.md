@@ -10,9 +10,35 @@ A modern motorcycle trip planner built with Next.js, TypeScript, PostgreSQL, Pri
 - PostgreSQL
 - Prisma ORM 7
 - Local PostgreSQL via Docker Compose
+- Automatic production database migrations
 - Database health endpoint at /api/health
 
-## Getting started
+## Database initialization and migrations
+
+Database schema changes are tracked in `prisma/migrations`.
+
+Every production start runs:
+
+~~~bash
+prisma migrate deploy
+~~~
+
+before Next.js starts. Prisma checks the database migration history and:
+
+- creates the schema on a brand-new database
+- applies only pending migrations on an existing database
+- does nothing when the database is already current
+- fails startup if a migration cannot be safely applied
+
+This means Coolify deployments self-initialize against the configured `DATABASE_URL`.
+
+To inspect migration state manually:
+
+~~~bash
+npm run db:status
+~~~
+
+## Local development
 
 1. Install dependencies:
 
@@ -32,11 +58,11 @@ cp .env.example .env
 npm run db:up
 ~~~
 
-4. Generate Prisma Client and create the first migration:
+4. Apply committed migrations and generate Prisma Client:
 
 ~~~bash
+npm run db:deploy
 npm run db:generate
-npm run db:migrate -- --name init
 ~~~
 
 5. Start the application:
@@ -48,6 +74,16 @@ npm run dev
 Open http://localhost:3000.
 
 To verify the database connection, open http://localhost:3000/api/health.
+
+## Creating future migrations
+
+After changing `prisma/schema.prisma` during development:
+
+~~~bash
+npm run db:migrate -- --name describe_the_change
+~~~
+
+Commit both the schema change and the new migration folder. Production should use `prisma migrate deploy`, never `prisma migrate dev`.
 
 ## Initial data model
 
